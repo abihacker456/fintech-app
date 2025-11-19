@@ -44,7 +44,7 @@ app.logger.setLevel(logging.INFO)
 BASE_DIR = Path(__file__).parent
 DATABASE_PATH = BASE_DIR / 'iqub_ledger.db'
 
-# Rate limiting storage
+# Rate limiting storage (temporarily disabled)
 login_attempts = {}
 
 # ===== UTILITY FUNCTIONS =====
@@ -70,6 +70,11 @@ def rate_limit(key_prefix, max_attempts=5, time_window=900):  # 15 minutes
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            # Temporarily bypass rate limiting
+            return f(*args, **kwargs)
+            
+            # Original rate limiting code (commented out)
+            '''
             ip_address = request.remote_addr
             key = f"{key_prefix}:{ip_address}"
             
@@ -87,6 +92,7 @@ def rate_limit(key_prefix, max_attempts=5, time_window=900):  # 15 minutes
             login_attempts[key] = attempts
             
             return f(*args, **kwargs)
+            '''
         return decorated_function
     return decorator
 
@@ -229,7 +235,7 @@ def index():
     return redirect('/login')
 
 @app.route('/login', methods=['GET', 'POST'])
-@rate_limit('login', max_attempts=5, time_window=900)
+# @rate_limit('login', max_attempts=5, time_window=900)  # TEMPORARILY DISABLED
 def login():
     if request.method == 'POST':
         phone = request.form.get('phone', '').strip()
