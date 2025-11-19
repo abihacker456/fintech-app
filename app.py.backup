@@ -1,0 +1,628 @@
+# -------------------------------------------------------------------------
+# FinTech Iqub Ledger MVP - Flask Web Application (V3)
+# New Feature: Secure Payout Transaction (Atomic Transaction)
+# -------------------------------------------------------------------------
+import sqlite3
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, flash, get_flashed_messages
+from datetime import datetime, date
+import secrets
+
+# --- 1. CONFIGURATION & DATABASE SETUP ---
+DB_NAME = 'iqub_ledger.db'
+app = Flask(__name__)
+app.config['SECRET_KEY'] = secrets.token_hex(16)
+
+def get_db_connection():
+    """Establishes a connection to the SQLite database."""
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def setup_database():
+    """
+    Initializes the database structure: members, contributions, and payouts tables.
+    Also ensures an initial admin user exists for testing.
+    """
+    print("🔧 Setting up database...")
+    
+    # Delete existing database to start fresh
+    if os.path.exists(DB_NAME):
+        os.remove(DB_NAME)
+        print("🗑️  Removed old database file")
+    
+    conn = get_db_connection()
+    try:
+        # 1. Members Table (Users)
+        conn.execute("""
+            CREATE TABLE members (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                full_name TEXT NOT NULL,
+                phone_number TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                date_joined DATE NOT NULL,
+                is_admin INTEGER NOT NULL DEFAULT 0
+            );
+        """)
+        print("✅ Members table created")
+
+        # 2. Contributions Table (Inflow/Ledger)
+        conn.execute("""
+            CREATE TABLE contributions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                member_id INTEGER NOT NULL,
+                amount REAL NOT NULL,
+                payment_date DATE NOT NULL,
+                reference TEXT,
+                FOREIGN KEY (member_id) REFERENCES members (id)
+            );
+        """)
+        print("✅ Contributions table created")
+        
+        # 3. Payouts Table (Outflow record)
+        conn.execute("""
+            CREATE TABLE payouts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                member_id INTEGER NOT NULL,
+                amount REAL NOT NULL,
+                payout_date DATE NOT NULL,
+                reference TEXT,
+                FOREIGN KEY (member_id) REFERENCES members (id)
+            );
+        """)
+        print("✅ Payouts table created")
+
+        # Insert a default Admin user
+        admin_phone = '0911000000'
+        conn.execute(
+            "INSERT INTO members (full_name, phone_number, password, date_joined, is_admin) VALUES (?, ?, ?, ?, ?)",
+            ('Iqub Admin', admin_phone, 'admin', date.today().strftime('%Y-%m-%d'), 1)
+        )
+        print("✅ Default admin user created")
+
+        conn.commit()
+        print("🎉 Database setup completed successfully!")
+        
+    except sqlite3.Error as e:
+        print(f"❌ Database setup error: {e}")
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+
+def check_database():
+    """Check if database tables exist"""
+    if not os.path.exists(DB_NAME):
+        print("❌ Database file does not exist")
+        return False
+        
+    conn = get_db_connection()
+    try:
+        tables = conn.execute("""
+            SELECT name FROM sqlite_master WHERE type='table' AND name IN ('members', 'contributions', 'payouts')
+        """).fetchall()
+        
+        table_names = [table['name'] for table in tables]
+        print(f"📊 Found tables: {table_names}")
+        
+        if len(table_names) == 3:
+            print("✅ All tables exist")
+            return True
+        else:
+            print("❌ Missing tables")
+            return False
+            
+    except sqlite3.Error as e:
+        print(f"❌ Error checking database: {e}")
+        return False
+    finally:
+        conn.close()
+
+def login_required(f):
+    """Decorator to protect routes from unauthenticated access."""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session or not session['logged_in']:
+            flash("You must be logged in to view that page.", 'error')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# -------------------------------------------------------------------------
+# --- FLASK ROUTES ---
+# -------------------------------------------------------------------------
+
+@app.route('/')
+def index():
+    """Default entry point redirects to login or dashboard."""
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handles member login and session creation."""
+    if request.method == 'POST':
+        phone_number = request.form['phone_number']
+        password = request.form['password']
+
+        print(f"🔐 Login attempt: {phone_number}")
+
+        conn = get_db_connection()
+        try:
+            member = conn.execute(
+                "SELECT id, full_name, is_admin, password FROM members WHERE phone_number = ?",
+                (phone_number,)
+            ).fetchone()
+
+            if member:
+                print(f"👤 User found: {member['full_name']}")
+                
+            if member and member['password'] == password:
+                session['logged_in'] = True
+                session['member_id'] = member['id']
+                session['full_name'] = member['full_name']
+                session['is_admin'] = member['is_admin']
+                flash(f"Welcome, {member['full_name']}. You are logged in.", 'success')
+                print("✅ Login successful")
+                return redirect(url_for('dashboard'))
+            else:
+                flash("Login failed. Check your phone number or password.", 'error')
+                print("❌ Login failed")
+                
+        except sqlite3.Error as e:
+            flash(f"Database error during login: {e}", 'error')
+            print(f"❌ Database error: {e}")
+        finally:
+            conn.close()
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logs out the member and clears the session."""
+    session.clear()
+    flash("You have been successfully logged out.", 'success')
+    return redirect(url_for('login'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_member():
+    """Handles the registration of a new member."""
+    today_date = date.today().strftime('%Y-%m-%d')
+    
+    if request.method == 'POST':
+        full_name = request.form['full_name']
+        phone_number = request.form['phone_number']
+        password = request.form['password']
+        date_joined = request.form['date_joined']
+        is_admin = 1 if request.form.get('is_admin') else 0
+
+        print(f"📝 Attempting to register: {full_name}, {phone_number}")
+
+        conn = get_db_connection()
+        try:
+            # Check for existing user
+            existing = conn.execute("SELECT id FROM members WHERE phone_number = ?", (phone_number,)).fetchone()
+            if existing:
+                flash("A member with this phone number already exists.", 'error')
+                print("❌ Registration failed: Phone number already exists")
+                return redirect(url_for('register_member'))
+
+            # Insert new member
+            conn.execute(
+                "INSERT INTO members (full_name, phone_number, password, date_joined, is_admin) VALUES (?, ?, ?, ?, ?)",
+                (full_name, phone_number, password, date_joined, is_admin)
+            )
+            conn.commit()
+            flash(f"Member '{full_name}' successfully registered. They can now log in.", 'success')
+            print(f"✅ Member '{full_name}' registered successfully")
+            return redirect(url_for('members_list'))
+
+        except sqlite3.IntegrityError as e:
+            flash(f"Registration failed due to data integrity error: {e}. Check phone number format.", 'error')
+            conn.rollback()
+            print(f"❌ Integrity error: {e}")
+        except sqlite3.Error as e:
+            flash(f"Database error during registration: {e}", 'error')
+            conn.rollback()
+            print(f"❌ Database error: {e}")
+        except Exception as e:
+            flash(f"Unexpected error during registration: {e}", 'error')
+            conn.rollback()
+            print(f"❌ Unexpected error: {e}")
+        finally:
+            conn.close()
+            
+    return render_template('register.html', today_date=today_date)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    """Displays the personal dashboard for the logged-in member."""
+    member_id = session.get("member_id")
+    member_stats = {'total_contributed': 0.0, 'total_received': 0.0}
+    recent_contributions = []
+
+    conn = get_db_connection()
+    try:
+        summary = conn.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0) as total_contributed,
+                COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0) as total_received
+            FROM contributions 
+            WHERE member_id = ?
+        """, (member_id,)).fetchone()
+        
+        if summary:
+            member_stats['total_contributed'] = float(summary['total_contributed'])
+            member_stats['total_received'] = float(summary['total_received'])
+        
+        recent_contributions = conn.execute("""
+            SELECT amount, payment_date, reference as note 
+            FROM contributions 
+            WHERE member_id = ? AND amount > 0
+            ORDER BY payment_date DESC 
+            LIMIT 5
+        """, (member_id,)).fetchall()
+        
+    except sqlite3.Error as e:
+        flash(f"Database error loading dashboard data: {e}", 'error')
+    finally:
+        conn.close()
+
+    return render_template('dashboard.html', 
+                         member_stats=member_stats, 
+                         recent_contributions=recent_contributions)
+
+@app.route('/contribution', methods=['GET', 'POST'])
+@login_required
+def contribution():
+    """Handles recording a new financial contribution from the logged-in member."""
+    member_id = session.get("member_id")
+    today_date = date.today().strftime('%Y-%m-%d')
+
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            amount = float(request.form['amount'])
+            payment_date = request.form['payment_date']
+            note = request.form.get('note', '').strip() or None
+
+            if amount <= 0:
+                flash("Contribution amount must be a positive number.", 'error')
+                return redirect(url_for('contribution'))
+
+            conn.execute(
+                "INSERT INTO contributions (member_id, amount, payment_date, reference) VALUES (?, ?, ?, ?)",
+                (member_id, amount, payment_date, note)
+            )
+            
+            conn.commit()
+            flash(f"Successfully recorded contribution of {amount:,.2f} Birr.", 'success')
+            return redirect(url_for('dashboard'))
+
+        except ValueError:
+            flash("Invalid input. Please enter a valid number for the amount.", 'error')
+        except sqlite3.Error as e:
+            flash(f"Database error during contribution: {e}", 'error')
+            conn.rollback()
+        finally:
+            conn.close()
+        return redirect(url_for('contribution'))
+
+    return render_template('contribute.html', today_date=today_date)
+
+@app.route('/payout', methods=['GET', 'POST'])
+@login_required
+def payout():
+    """Handles recording a new financial payout to a member using atomic transaction."""
+    if not session.get('is_admin'):
+        flash("Access Denied: Only administrators can record payouts.", 'error')
+        return redirect(url_for('dashboard'))
+
+    def get_total_balance(conn):
+        net_balance = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM contributions"
+        ).fetchone()[0] or 0.0
+        return net_balance
+        
+    conn = get_db_connection()
+    members = []
+    total_balance = 0.0
+    today_date = date.today().strftime('%Y-%m-%d')
+    
+    try:
+        members = conn.execute("SELECT id, full_name FROM members ORDER BY full_name").fetchall()
+        total_balance = get_total_balance(conn)
+    except sqlite3.Error as e:
+        flash(f"Could not load data for payout form: {e}", 'error')
+        conn.close()
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            member_id = int(request.form['member_id'])
+            amount = float(request.form['amount'])
+            payout_date = request.form['payout_date']
+            reference = request.form.get('reference', '').strip() or 'Iqub Payout'
+            
+            if amount <= 0:
+                flash("Payout amount must be a positive number.", 'error')
+                return redirect(url_for('payout'))
+            
+            if amount > total_balance:
+                flash(f"Error: Insufficient funds. Current balance is {total_balance:,.2f} Birr. Payout failed.", 'error')
+                return redirect(url_for('payout'))
+            
+            conn.execute(
+                "INSERT INTO payouts (member_id, amount, payout_date, reference) VALUES (?, ?, ?, ?)",
+                (member_id, amount, payout_date, reference)
+            )
+            
+            conn.execute(
+                "INSERT INTO contributions (member_id, amount, payment_date, reference) VALUES (?, ?, ?, ?)",
+                (member_id, -amount, payout_date, 'PAYOUT: ' + reference)
+            )
+            
+            conn.commit()
+            flash(f"Successfully recorded atomic payout transaction of {amount:,.2f} Birr.", 'success')
+            return redirect(url_for('dashboard'))
+            
+        except ValueError:
+            flash("Invalid amount or member selected. Please check your inputs.", 'error')
+            conn.rollback()
+        except sqlite3.Error as e:
+            flash(f"Database error during transaction: {e}", 'error')
+            conn.rollback()
+        finally:
+            conn.close()
+        return redirect(url_for('payout'))
+
+    conn.close()
+    return render_template('payout.html', members=members, today_date=today_date, total_balance=total_balance)
+
+@app.route('/members')
+@login_required
+def members_list():
+    """Displays a list of all members."""
+    if not session.get('is_admin'):
+        flash("Access Denied: Only administrators can view the full member list.", 'error')
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    members = []
+    try:
+        members = conn.execute(
+            "SELECT id, full_name, phone_number, date_joined FROM members ORDER BY full_name"
+        ).fetchall()
+    except sqlite3.Error as e:
+        flash(f"Database error fetching member list: {e}", 'error')
+    finally:
+        conn.close()
+        
+    return render_template('members.html', members=members)
+
+@app.route('/members/<int:member_id>')
+@login_required
+def member_detail(member_id):
+    """Displays a detailed ledger and summary for a single member."""
+    if not session.get('is_admin') and session.get('member_id') != member_id:
+        flash("Access Denied: You can only view your own ledger details.", 'error')
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    member = None
+    summary = {'contributed': 0.0, 'received': 0.0}
+    transactions = []
+
+    try:
+        member = conn.execute(
+            "SELECT id, full_name, phone_number, date_joined FROM members WHERE id = ?", (member_id,)
+        ).fetchone()
+
+        if member is None:
+            flash("Member not found.", 'error')
+            return redirect(url_for('members_list'))
+
+        summary_query = conn.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0) as contributed,
+                COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0) as received
+            FROM contributions 
+            WHERE member_id = ?
+        """, (member_id,)).fetchone()
+        
+        if summary_query:
+            summary['contributed'] = float(summary_query['contributed'])
+            summary['received'] = float(summary_query['received'])
+
+        ledger_entries = conn.execute("""
+            SELECT 
+                payment_date as date, 
+                amount, 
+                reference 
+            FROM contributions 
+            WHERE member_id = ?
+            ORDER BY date DESC
+        """, (member_id,)).fetchall()
+        
+        for entry in ledger_entries:
+            if entry['amount'] > 0:
+                tx_type = 'Contribution'
+                amount = entry['amount']
+            else:
+                tx_type = 'Payout'
+                amount = abs(entry['amount'])
+                
+            transactions.append({
+                'date': entry['date'],
+                'type': tx_type,
+                'amount': amount,
+                'reference': entry['reference']
+            })
+            
+    except sqlite3.Error as e:
+        flash(f"Database error fetching member details: {e}", 'error')
+    finally:
+        conn.close()
+        
+    return render_template('member_detail.html', 
+                         member=member, 
+                         summary=summary, 
+                         transactions=transactions)
+
+@app.route('/my_status')
+@login_required
+def my_status():
+    """Displays personal financial status for the logged-in member."""
+    member_id = session.get('member_id')
+    
+    conn = get_db_connection()
+    member_data = {}
+    contributions = []
+    payouts = []
+    
+    try:
+        # Get member basic info
+        member = conn.execute(
+            "SELECT id, full_name FROM members WHERE id = ?", (member_id,)
+        ).fetchone()
+        
+        if not member:
+            flash("Member not found.", 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Get financial summary
+        summary = conn.execute("""
+            SELECT 
+                COALESCE(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0) as total_contributed,
+                COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0) as amount_received
+            FROM contributions 
+            WHERE member_id = ?
+        """, (member_id,)).fetchone()
+        
+        member_data = {
+            'full_name': member['full_name'],
+            'total_contributed': float(summary['total_contributed']),
+            'amount_received': float(summary['amount_received'])
+        }
+        
+        # Get contributions history
+        contributions = conn.execute("""
+            SELECT payment_date as contribution_date, amount, reference as transaction_id
+            FROM contributions 
+            WHERE member_id = ? AND amount > 0
+            ORDER BY contribution_date DESC
+        """, (member_id,)).fetchall()
+        
+        # Get payouts history
+        payouts = conn.execute("""
+            SELECT payout_date, amount, reference
+            FROM payouts 
+            WHERE member_id = ?
+            ORDER BY payout_date DESC
+        """, (member_id,)).fetchall()
+        
+    except sqlite3.Error as e:
+        flash(f"Database error loading your status: {e}", 'error')
+    finally:
+        conn.close()
+    
+    return render_template('my_status.html', 
+                         member=member_data, 
+                         contributions=contributions, 
+                         payouts=payouts)
+
+@app.route('/report')
+@login_required
+def financial_report():
+    """Generates a full financial report showing net positions for all members."""
+    if not session.get('is_admin'):
+        flash("Access Denied: Only administrators can view the full financial report.", 'error')
+        return redirect(url_for('dashboard'))
+
+    conn = get_db_connection()
+    member_data = []
+    total_contributions = 0.0
+    total_payouts = 0.0
+
+    try:
+        total_contributions = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM contributions WHERE amount > 0"
+        ).fetchone()[0] or 0.0
+        
+        total_payouts = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM payouts"
+        ).fetchone()[0] or 0.0
+
+        member_data = conn.execute("""
+            SELECT 
+                m.id as member_id,
+                m.full_name,
+                m.phone_number,
+                COALESCE(SUM(CASE WHEN c.amount > 0 THEN c.amount ELSE 0 END), 0) as total_contributed,
+                COALESCE(SUM(CASE WHEN c.amount < 0 THEN ABS(c.amount) ELSE 0 END), 0) as total_received
+            FROM members m
+            LEFT JOIN contributions c ON m.id = c.member_id
+            GROUP BY m.id, m.full_name, m.phone_number
+            ORDER BY m.full_name
+        """).fetchall()
+
+    except sqlite3.Error as e:
+        flash(f"Database error generating report: {e}", 'error')
+    finally:
+        conn.close()
+
+    return render_template('report.html', 
+                         report_data=member_data,
+                         total_contributions=total_contributions,
+                         total_payouts=total_payouts)
+
+@app.route('/about')
+def about():
+    """About page with founder contact information."""
+    return render_template('about.html')
+
+@app.route('/debug')
+def debug():
+    """Debug route to check database status"""
+    conn = get_db_connection()
+    try:
+        # Check tables
+        tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        table_names = [table['name'] for table in tables]
+        
+        # Check users
+        users = conn.execute("SELECT * FROM members").fetchall()
+        user_data = [dict(user) for user in users]
+        
+        return {
+            "tables": table_names,
+            "users": user_data,
+            "database_file": DB_NAME,
+            "file_exists": os.path.exists(DB_NAME)
+        }
+    except Exception as e:
+        return {"error": str(e)}
+    finally:
+        conn.close()
+
+# -------------------------------------------------------------------------
+# --- RUNNER ---
+# -------------------------------------------------------------------------
+if __name__ == '__main__':
+    print("-------------------------------------------------------------------------")
+    print("Iqub FinTech MVP is starting...")
+    print("To run the application, open your browser to: http://127.0.0.1:5000/")
+    print("Press CTRL+C to stop the server.")
+    print("-------------------------------------------------------------------------")
+    
+    # Force database setup on startup
+    print("🔄 Initializing database...")
+    if not check_database():
+        setup_database()
+    else:
+        print("✅ Database already exists")
+    
+    app.run(debug=True)
