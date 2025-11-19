@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - IqubLedger{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Get in <span class="text-indigo-600">Touch</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Have questions about IqubLedger? We're here to help you get started and support your Iqub community.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Contact Information -->
+        <div class="space-y-8">
+            <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-phone text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Phone</h3>
+                            <p class="text-gray-600">+251-948-713-566</p>
+                            <p class="text-sm text-gray-500">Available 8:00 AM - 8:00 PM EAT</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fab fa-telegram text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Telegram</h3>
+                            <p class="text-gray-600">@fintechcompany1</p>
+                            <p class="text-sm text-gray-500">Fastest response for technical support</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-map-marker-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Location</h3>
+                            <p class="text-gray-600">Bale Robe, Ethiopia</p>
+                            <p class="text-sm text-gray-500">Serving Iqub communities nationwide</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-clock text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Support Hours</h3>
+                            <p class="text-gray-600">Monday - Saturday: 8:00 AM - 8:00 PM</p>
+                            <p class="text-gray-600">Sunday: 10:00 AM - 6:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Support Card -->
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-3">💡 Quick Support</h3>
+                <p class="mb-4">For immediate assistance, contact us directly on Telegram:</p>
+                <a href="https://t.me/fintechcompany1" 
+                   class="inline-flex items-center bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition duration-150">
+                    <i class="fab fa-telegram mr-2"></i>
+                    Message on Telegram
+                </a>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+            
+            <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+                            First Name
+                        </label>
+                        <input type="text" id="firstName" name="firstName"
+                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                               placeholder="Your first name">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+                            Last Name
+                        </label>
+                        <input type="text" id="lastName" name="lastName"
+                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                               placeholder="Your last name">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" id="email" name="email"
+                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                           placeholder="your.email@example.com">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number
+                    </label>
+                    <input type="tel" id="phone" name="phone"
+                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                           placeholder="0911XXXXXX">
+                </div>
+
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+                        Subject
+                    </label>
+                    <select id="subject" name="subject"
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+                        <option value="">Select a subject</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="registration">Registration Help</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="partnership">Partnership Inquiry</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                        Message
+                    </label>
+                    <textarea id="message" name="message" rows="5"
+                              class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                              placeholder="Tell us how we can help you..."></textarea>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 font-medium text-lg">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="mt-16">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Frequently Asked Questions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-semibold text-gray-900 mb-2">How do I join an Iqub group?</h3>
+                <p class="text-gray-600">Click "Sign Up" and select your preferred group during registration. If your group isn't listed, contact us to create it.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-semibold text-gray-900 mb-2">Is my financial data secure?</h3>
+                <p class="text-gray-600">Yes! We use bank-level encryption and security measures to protect all your financial information.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-semibold text-gray-900 mb-2">Can I access from mobile?</h3>
+                <p class="text-gray-600">Absolutely! IqubLedger is fully responsive and works perfectly on all mobile devices.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-semibold text-gray-900 mb-2">What if I forget my password?</h3>
+                <p class="text-gray-600">Contact our support team directly via phone or Telegram for immediate password reset assistance.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

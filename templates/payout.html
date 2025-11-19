@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payout{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white shadow-2xl rounded-xl p-8 sm:p-10 border border-gray-100">
+
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Record Iqub Payout
+            </h1>
+            <p class="mt-1 text-lg text-gray-600">
+                Officially document the lump sum payment received by a member. This transaction is **atomic** and permanent.
+            </p>
+        </header>
+        
+        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-lg mb-8">
+            <p class="text-sm font-medium text-indigo-700">Current Group Balance:</p>
+            <p class="text-2xl font-bold text-indigo-900 mt-1">{{ "{:,.2f}".format(total_balance) }} Birr</p>
+            <p class="text-xs text-indigo-600 mt-1">This is the maximum available fund for disbursement.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="rounded-lg p-4 mb-6 
+                        {% if category == 'success' %}bg-green-100 border border-green-400 text-green-700{% elif category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-yellow-100 border border-yellow-400 text-yellow-700{% endif %}"
+                         role="alert">
+                        <p class="font-medium">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form class="space-y-6" action="{{ url_for('payout') }}" method="POST">
+            <div class="space-y-6">
+                
+                <div>
+                    <label for="member_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        Member Receiving Payout
+                    </label>
+                    <select id="member_id" name="member_id" required
+                            class="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg shadow-sm transition duration-150">
+                        <option value="">-- Select Member --</option>
+                        {% for member in members %}
+                        <option value="{{ member.id }}">{{ member.full_name }} (ID: {{ member.id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
+                        Payout Amount (in Birr)
+                    </label>
+                    <input type="number" name="amount" id="amount" step="0.01" min="1" required
+                           class="focus:ring-indigo-500 focus:border-indigo-500 block w-full px-4 py-3 sm:text-lg border-gray-300 rounded-lg font-bold text-gray-900 transition duration-150"
+                           placeholder="e.g., 2000.00">
+                </div>
+                
+                <div>
+                    <label for="payout_date" class="block text-sm font-medium text-gray-700 mb-1">
+                        Date of Payout
+                    </label>
+                    <input type="date" name="payout_date" id="payout_date" required
+                           class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-4 py-3 sm:text-lg border-gray-300 rounded-lg transition duration-150"
+                           value="{{ today_date }}"
+                           max="{{ today_date }}">
+                </div>
+
+                <div>
+                    <label for="reference" class="block text-sm font-medium text-gray-700 mb-1">
+                        Reference / Description (e.g., "Cycle 1 Payout", "Emergency Disbursement")
+                    </label>
+                    <textarea id="reference" name="reference" rows="3"
+                              class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg transition duration-150"
+                              placeholder="Cycle 1 Payout for [Member Name]"></textarea>
+                </div>
+
+            </div>
+
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 transform hover:scale-[1.01]">
+                    <svg class="h-6 w-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                    </svg>
+                    Confirm Payout Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Process Withdrawal - IqubLedger{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+            Process Withdrawal
+        </h1>
+        <p class="mt-2 text-lg text-gray-600">
+            Authorize fund disbursement to Iqub members
+        </p>
+    </div>
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
+        <form class="space-y-6" action="/withdraw" method="POST">
+            <div>
+                <label for="member_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Member
+                </label>
+                <select id="member_id" name="member_id" required
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+                    <option value="">Choose a member...</option>
+                    {% for member in members %}
+                        <option value="{{ member.id }}">
+                            {{ member.name }} - {{ member.phone }} (Balance: {{ "{:,.2f}".format(member.balance) }} Birr)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                    Withdrawal Amount (Birr)
+                </label>
+                <input type="number" name="amount" id="amount" step="0.01" min="1" required
+                       class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 font-semibold text-lg"
+                       placeholder="0.00">
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Withdrawal Reason
+                </label>
+                <textarea id="description" name="description" rows="3" required
+                          class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                          placeholder="Describe the purpose of this withdrawal..."></textarea>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Administrative Action:</strong> This withdrawal will be permanently recorded in the system ledger.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 font-medium text-lg">
+                <i class="fas fa-money-bill-wave mr-2"></i>
+                Process Withdrawal
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

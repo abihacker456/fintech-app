@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - IqubLedger{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Update Your Profile</h1>
+        
+        <form class="space-y-6" action="/profile/update" method="POST">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                </label>
+                <input type="email" id="email" name="email" 
+                       class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                       value="{{ user.email or '' }}"
+                       placeholder="your.email@example.com">
+                <p class="mt-1 text-sm text-gray-500">Required for password recovery and notifications</p>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit"
+                        class="bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-150 font-medium">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+                <a href="/profile" 
+                   class="bg-gray-600 text-white py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-150 font-medium">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

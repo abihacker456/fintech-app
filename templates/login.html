@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Login - IqubLedger{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-hand-holding-usd text-white text-2xl"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900">
+                Welcome Back
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Sign in to your IqubLedger account
+            </p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
+            <form class="space-y-6" action="/login" method="POST">
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-phone text-gray-400"></i>
+                        </div>
+                        <input id="phone" name="phone" type="tel" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                               placeholder="0911000000">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                               placeholder="Enter your password">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 font-medium text-lg">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        Don't have an account?
+                        <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150">
+                            Sign up here
+                        </a>
+                    </p>
+                </div>
+            </form>
+
+            <!-- Demo Account Info -->
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Demo Account
+                </h4>
+                <div class="text-xs text-blue-700 space-y-1">
+                    <p><strong>Phone:</strong> 0911000000</p>
+                    <p><strong>Password:</strong> admin123</p>
+                    <p><strong>Role:</strong> Administrator</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

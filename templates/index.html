@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Iqub Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="space-y-8">
+<!-- Flash Messages (Important for feedback!) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="space-y-3">
+{% for category, message in messages %}
+<div class="p-4 rounded-xl shadow-md
+{% if category == 'success' %}bg-green-100 text-green-800 border-green-400{% elif category == 'error' %}bg-red-100 text-red-800 border-red-400{% else %}bg-blue-100 text-blue-800 border-blue-400{% endif %}">
+<p class="font-medium">{{ message }}</p>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<header class="pb-4 border-b border-gray-200">
+    <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+        Iqub FinTech Dashboard
+    </h1>
+    <p class="text-xl text-gray-600 mt-1">
+        Welcome, Abinet! Your financial ledger management system is ready.
+    </p>
+</header>
+
+<!-- Key Actions Grid -->
+<h2 class="text-2xl font-semibold text-gray-800">Quick Actions</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- 1. Record Contribution -->
+    <a href="{{ url_for('record_contribution') }}" class="block p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02] border-l-4 border-green-500">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Record Contribution
+        </h3>
+        <p class="mt-2 text-gray-600 text-sm">Log a new payment from a member into the Iqub fund.</p>
+    </a>
+
+    <!-- 2. Process Payout -->
+    <a href="{{ url_for('payout_form') }}" class="block p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02] border-l-4 border-indigo-500">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0l3 3m-3-3l-3 3" />
+            </svg>
+            Process Payout
+        </h3>
+        <p class="mt-2 text-gray-600 text-sm">Disburse funds to a member (uses a secure database transaction).</p>
+    </a>
+
+    <!-- 3. Financial Report -->
+    <a href="{{ url_for('financial_report') }}" class="block p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.02] border-l-4 border-blue-500">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z" />
+            </svg>
+            View Financial Report
+        </h3>
+        <p class="mt-2 text-gray-600 text-sm">Check the total fund balance and individual member ledgers.</p>
+    </a>
+
+</div>
+
+<!-- Member Management Link -->
+<a href="{{ url_for('member_list') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gray-700 hover:bg-gray-800 mt-6 transition duration-150">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+    </svg>
+    Go to Member Management
+</a>
+
+
+</div>
+{% endblock %}
