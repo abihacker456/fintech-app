@@ -102,8 +102,8 @@
         </div>
     </div>
 
-    <!-- Action Cards Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Action Cards Grid - Now 3 columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Make Contribution Card -->
         <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
             <div class="flex items-center mb-4">
@@ -211,6 +211,50 @@
                     <p class="text-gray-500">No other members in your group yet.</p>
                 </div>
             {% endif %}
+        </div>
+
+        <!-- Mobile App Download Card - NEW CARD -->
+        <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-mobile-alt text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900">Mobile App</h3>
+                    <p class="text-sm text-gray-600">Download our Android app</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <a href="https://drive.google.com/file/d/1BUh69rbeXmwVIfDKS4P-Mkt3T60xaKtE/view?usp=sharing" 
+                   target="_blank"
+                   class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 font-medium text-lg text-center block">
+                    <i class="fas fa-download mr-2"></i>
+                    Download APK
+                </a>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-yellow-700">
+                            <strong>Test Version:</strong> This is a demo app for testing only. 
+                            Install at your own risk.
+                        </div>
+                    </div>
+                </div>
+                
+                <details class="text-sm text-gray-600">
+                    <summary class="cursor-pointer font-medium">Installation Instructions</summary>
+                    <ol class="mt-2 space-y-1 list-decimal list-inside">
+                        <li>Click download button above</li>
+                        <li>Open Google Drive app on your phone</li>
+                        <li>Tap "Download" on the APK file</li>
+                        <li>Open Downloads folder and tap the APK</li>
+                        <li>Allow "Install from unknown sources" if prompted</li>
+                        <li>Tap "Install" and open the app</li>
+                    </ol>
+                </details>
+            </div>
         </div>
     </div>
 
