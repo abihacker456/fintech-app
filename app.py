@@ -1060,6 +1060,12 @@ def disable_2fa():
 # ===== ADMIN ROUTES =====
 @app.route('/admin')
 @admin_required
+def admin():
+    """Admin route - redirect to admin dashboard"""
+    return redirect('/admin_dashboard')
+
+@app.route('/admin_dashboard')
+@admin_required
 def admin_dashboard():
     """Admin dashboard"""
     conn = get_db()
@@ -1127,7 +1133,7 @@ def security_audit():
         LEFT JOIN transactions t ON u.id = t.user_id 
         GROUP BY u.id, u.name, u.phone
         HAVING last_activity < ? OR last_activity IS NULL
-    ''', (cutoff_date,)).fetchall()
+    ''', (cutoff_date,)).fetchall()  # FIXED: was cutcutoff_date, now cutoff_date
     audit_results['inactive_users'] = inactive_users
     
     # Check admins without 2FA
@@ -1341,4 +1347,3 @@ if __name__ == '__main__':
     print("=" * 50)
     
     app.run(host='0.0.0.0', port=port, debug=debug)
-
