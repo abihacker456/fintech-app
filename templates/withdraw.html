@@ -4,69 +4,254 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
+    <!-- Header -->
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900">
+            <i class="fas fa-money-bill-wave text-blue-600 mr-2"></i>
             Process Withdrawal
         </h1>
         <p class="mt-2 text-lg text-gray-600">
             Authorize fund disbursement to Iqub members
         </p>
+        <div class="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800">
+            <i class="fas fa-user-shield mr-2"></i>
+            Administrator Action Required
+        </div>
     </div>
 
+    <!-- Withdrawal Form -->
     <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
         <form class="space-y-6" action="/withdraw" method="POST">
+            <!-- Select Member -->
             <div>
                 <label for="member_id" class="block text-sm font-medium text-gray-700 mb-2">
                     Select Member
                 </label>
                 <select id="member_id" name="member_id" required
-                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                        onchange="updateMemberInfo()">
                     <option value="">Choose a member...</option>
                     {% for member in members %}
-                        <option value="{{ member.id }}">
+                        <option value="{{ member.id }}" data-balance="{{ member.balance }}">
                             {{ member.name }} - {{ member.phone }} (Balance: {{ "{:,.2f}".format(member.balance) }} Birr)
                         </option>
                     {% endfor %}
                 </select>
-            </div>
-
-            <div>
-                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
-                    Withdrawal Amount (Birr)
-                </label>
-                <input type="number" name="amount" id="amount" step="0.01" min="1" required
-                       class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 font-semibold text-lg"
-                       placeholder="0.00">
-            </div>
-
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Withdrawal Reason
-                </label>
-                <textarea id="description" name="description" rows="3" required
-                          class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                          placeholder="Describe the purpose of this withdrawal..."></textarea>
-            </div>
-
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            <strong>Administrative Action:</strong> This withdrawal will be permanently recorded in the system ledger.
+                <div id="member-info" class="mt-2 hidden">
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            Selected member balance: <span id="selected-balance" class="font-bold">0.00</span> Birr
                         </p>
                     </div>
                 </div>
             </div>
 
-            <button type="submit"
-                    class="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 font-medium text-lg">
-                <i class="fas fa-money-bill-wave mr-2"></i>
-                Process Withdrawal
-            </button>
+            <!-- Amount -->
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                    Withdrawal Amount (Birr)
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500 sm:text-sm"> Birr</span>
+                    </div>
+                    <input type="number" name="amount" id="amount" step="0.01" min="1" required
+                           class="block w-full pl-16 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 font-semibold text-lg text-blue-700"
+                           placeholder="0.00"
+                           oninput="validateAmount()">
+                </div>
+                <p class="mt-1 text-sm text-gray-500" id="amount-validation">
+                    Enter withdrawal amount
+                </p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Withdrawal Reason
+                </label>
+                <textarea id="description" name="description" rows="3" required
+                          class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                          placeholder="Describe the purpose of this withdrawal..."></textarea>
+                <p class="mt-1 text-sm text-gray-500">
+                    Provide details for audit purposes
+                </p>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="preview" class="hidden">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-4">Withdrawal Preview</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Selected Member:</span>
+                            <span class="font-semibold" id="preview-member">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Current Balance:</span>
+                            <span class="font-semibold" id="preview-balance">0.00 Birr</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Withdrawal Amount:</span>
+                            <span class="font-bold text-blue-700" id="preview-amount">0.00 Birr</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">New Balance:</span>
+                            <span class="font-bold text-indigo-700" id="preview-new-balance">0.00 Birr</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-600 mt-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        This transaction will be permanently recorded
+                    </p>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">
+                            <strong>Administrative Action:</strong> This withdrawal will permanently deduct funds from the member's account.
+                            Ensure you have proper authorization before proceeding.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" id="submit-btn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 font-medium text-lg"
+                        disabled>
+                    <i class="fas fa-money-bill-wave mr-2"></i>
+                    Process Withdrawal
+                </button>
+            </div>
+
+            <!-- Cancel Link -->
+            <div class="text-center pt-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-gray-900 font-medium">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Cancel and return to Dashboard
+                </a>
+            </div>
         </form>
     </div>
 </div>
+
+<script>
+let selectedMemberBalance = 0;
+let selectedMemberName = '';
+
+function updateMemberInfo() {
+    const select = document.getElementById('member_id');
+    const option = select.options[select.selectedIndex];
+    const infoDiv = document.getElementById('member-info');
+    const previewDiv = document.getElementById('preview');
+    
+    if (option.value) {
+        selectedMemberBalance = parseFloat(option.dataset.balance);
+        selectedMemberName = option.text.split(' - ')[0];
+        
+        // Update member info display
+        infoDiv.classList.remove('hidden');
+        document.getElementById('selected-balance').textContent = 
+            selectedMemberBalance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        
+        // Update preview
+        updatePreview();
+    } else {
+        infoDiv.classList.add('hidden');
+        previewDiv.classList.add('hidden');
+        selectedMemberBalance = 0;
+        selectedMemberName = '';
+    }
+    
+    validateForm();
+}
+
+function validateAmount() {
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value) || 0;
+    const validationText = document.getElementById('amount-validation');
+    
+    if (amount <= 0) {
+        validationText.innerHTML = '<span class="text-red-600">Amount must be positive</span>';
+        return false;
+    }
+    
+    if (amount > selectedMemberBalance) {
+        validationText.innerHTML = `<span class="text-red-600">Insufficient balance. Available: ${selectedMemberBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} Birr</span>`;
+        return false;
+    }
+    
+    validationText.innerHTML = '<span class="text-green-600">✓ Amount is valid</span>';
+    updatePreview();
+    validateForm();
+    return true;
+}
+
+function updatePreview() {
+    const amountInput = document.getElementById('amount');
+    const amount = parseFloat(amountInput.value) || 0;
+    const previewDiv = document.getElementById('preview');
+    
+    if (selectedMemberName && amount > 0) {
+        previewDiv.classList.remove('hidden');
+        
+        document.getElementById('preview-member').textContent = selectedMemberName;
+        document.getElementById('preview-balance').textContent = 
+            selectedMemberBalance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' Birr';
+        document.getElementById('preview-amount').textContent = 
+            amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' Birr';
+        
+        const newBalance = selectedMemberBalance - amount;
+        document.getElementById('preview-new-balance').textContent = 
+            newBalance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' Birr';
+    } else {
+        previewDiv.classList.add('hidden');
+    }
+}
+
+function validateForm() {
+    const memberSelect = document.getElementById('member_id');
+    const amountInput = document.getElementById('amount');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    const isMemberSelected = memberSelect.value !== '';
+    const amount = parseFloat(amountInput.value) || 0;
+    const isAmountValid = amount > 0 && amount <= selectedMemberBalance;
+    
+    if (isMemberSelected && isAmountValid) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('member_id').addEventListener('change', updateMemberInfo);
+    document.getElementById('amount').addEventListener('input', validateAmount);
+});
+</script>
 {% endblock %}
