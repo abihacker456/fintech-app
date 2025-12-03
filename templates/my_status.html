@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Status: {{ member.full_name }}{% endblock %}
+{% block title %}My Status: {{ member.name }}{% endblock %}
 
 {% block content %}
 <div class="space-y-10">
@@ -8,18 +8,18 @@
     <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white">
         <div class="flex flex-col md:flex-row md:items-center justify-between">
             <div>
-                <h1 class="text-4xl font-bold mb-2">Hello, {{ member.full_name }}!</h1>
+                <h1 class="text-4xl font-bold mb-2">Hello, {{ member.name }}!</h1>
                 <p class="text-indigo-100 text-lg">
                     Your personal financial status in the Iqub
                 </p>
                 <div class="flex flex-wrap gap-4 mt-3 text-indigo-100">
                     <div class="flex items-center">
                         <i class="fas fa-users mr-2"></i>
-                        {{ member.group_name }}
+                        {{ member.group_name or 'No Group' }}
                     </div>
                     <div class="flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i>
-                        Joined: {{ member.date_joined or member.created_at[:10] }}
+                        Joined: {{ member.date_joined[:10] if member.date_joined else 'N/A' }}
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
             </div>
             <div class="mt-1 flex items-baseline">
                 <p class="text-3xl font-semibold text-green-700">
-                    {{ "{:,.2f}".format(member.total_contributed) }}
+                    {{ "{:,.2f}".format(total_contributed) }}
                 </p>
                 <span class="ml-2 text-md font-medium text-gray-500">Birr</span>
             </div>
@@ -60,7 +60,7 @@
             </div>
             <div class="mt-1 flex items-baseline">
                 <p class="text-3xl font-semibold text-blue-700">
-                    {{ "{:,.2f}".format(member.amount_received) }}
+                    {{ "{:,.2f}".format(amount_received) }}
                 </p>
                 <span class="ml-2 text-md font-medium text-gray-500">Birr</span>
             </div>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Net Balance -->
-        {% set net_balance = member.total_contributed - member.amount_received %}
+        {% set net_balance = total_contributed - amount_received %}
         <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 
             {% if net_balance >= 0 %}border-indigo-500{% else %}border-red-500{% endif %} p-6 transition duration-300 transform hover:scale-[1.02]">
             <div class="flex items-center mb-3">
@@ -131,7 +131,7 @@
                 <h2 class="text-2xl font-semibold text-gray-800">Contribution History</h2>
                 <p class="text-sm text-gray-500">All money paid into the Iqub</p>
                 <div class="mt-2 text-xs text-gray-600">
-                    Total: {{ "{:,.2f}".format(member.total_contributed) }} Birr
+                    Total: {{ "{:,.2f}".format(total_contributed) }} Birr
                 </div>
             </div>
             <div class="overflow-y-auto max-h-96">
@@ -179,7 +179,7 @@
                 <h2 class="text-2xl font-semibold text-gray-800">Payout History</h2>
                 <p class="text-sm text-gray-500">Money received from the Iqub</p>
                 <div class="mt-2 text-xs text-gray-600">
-                    Total: {{ "{:,.2f}".format(member.amount_received) }} Birr
+                    Total: {{ "{:,.2f}".format(amount_received) }} Birr
                 </div>
             </div>
             <div class="overflow-y-auto max-h-96">
@@ -231,27 +231,27 @@
             {% for transaction in sorted_transactions[:10] %}
             <div class="flex items-start">
                 <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4
-                    {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}bg-green-100 text-green-600
+                    {% if transaction.type == 'contribution' or 'contribution' in (transaction.description|lower if transaction.description else '') %}bg-green-100 text-green-600
                     {% else %}bg-blue-100 text-blue-600{% endif %}">
-                    <i class="fas {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}fa-arrow-up{% else %}fa-arrow-down{% endif %} text-xs"></i>
+                    <i class="fas {% if transaction.type == 'contribution' or 'contribution' in (transaction.description|lower if transaction.description else '') %}fa-arrow-up{% else %}fa-arrow-down{% endif %} text-xs"></i>
                 </div>
                 <div class="flex-1 pt-1">
                     <div class="flex justify-between">
                         <p class="font-medium text-gray-900">
-                            {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}
+                            {% if transaction.type == 'contribution' or 'contribution' in (transaction.description|lower if transaction.description else '') %}
                                 Contribution made
                             {% else %}
                                 Payout received
                             {% endif %}
                         </p>
                         <p class="font-bold 
-                            {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}text-green-700
+                            {% if transaction.type == 'contribution' or 'contribution' in (transaction.description|lower if transaction.description else '') %}text-green-700
                             {% else %}text-blue-700{% endif %}">
                             {{ "{:,.2f}".format(transaction.amount) }} Birr
                         </p>
                     </div>
                     <p class="text-sm text-gray-500">{{ transaction.description or 'Transaction' }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ transaction.date[:16] }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ transaction.date[:16] if transaction.date else '' }}</p>
                 </div>
             </div>
             {% if not loop.last %}
