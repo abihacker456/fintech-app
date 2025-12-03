@@ -1127,7 +1127,7 @@ def security_audit():
         LEFT JOIN transactions t ON u.id = t.user_id 
         GROUP BY u.id, u.name, u.phone
         HAVING last_activity < ? OR last_activity IS NULL
-    ''', (cutcutoff_date,)).fetchall()
+    ''', (cutoff_date,)).fetchall()
     audit_results['inactive_users'] = inactive_users
     
     # Check admins without 2FA
@@ -1341,3 +1341,4 @@ if __name__ == '__main__':
     print("=" * 50)
     
     app.run(host='0.0.0.0', port=port, debug=debug)
+
