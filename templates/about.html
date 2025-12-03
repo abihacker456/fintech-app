@@ -1,126 +1,192 @@
 {% extends "base.html" %}
 
-{% block title %}About Us - IqubLedger{% endblock %}
+{% block title %}About IqubLedger{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<div class="max-w-4xl mx-auto">
     <!-- Hero Section -->
-    <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            About <span class="text-indigo-600">IqubLedger</span>
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
+            About IqubLedger
         </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Revolutionizing traditional Iqub systems with modern, secure, and transparent financial technology.
+        <p class="mt-3 text-xl text-gray-600">
+            Modern financial management for traditional Iqub groups
+        </p>
+        <div class="mt-6">
+            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                <i class="fas fa-shield-alt mr-1"></i>
+                Secure • Transparent • Efficient
+            </span>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                <i class="fas fa-bullseye text-indigo-600 text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">Our Mission</h2>
+        </div>
+        <p class="text-gray-700 mb-4">
+            IqubLedger was created to bring modern financial technology to traditional 
+            rotating savings and credit associations (ROSCAs), known as Iqub in Ethiopia.
+        </p>
+        <p class="text-gray-700">
+            We believe that financial management should be secure, transparent, and accessible 
+            to everyone. Our platform digitizes the traditional Iqub system while preserving 
+            its cultural significance and community trust.
         </p>
     </div>
 
-    <!-- Mission & Vision -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-        <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
-            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-4">
-                <i class="fas fa-bullseye text-white text-xl"></i>
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <!-- Security -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-shield-alt text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Bank-Grade Security</h3>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
-            <p class="text-gray-600 leading-relaxed">
-                To empower Ethiopian Iqub communities with cutting-edge financial technology that ensures 
-                transparency, security, and efficiency in managing rotating savings and credit associations.
+            <p class="text-gray-600">
+                End-to-end encryption, two-factor authentication, and secure transactions 
+                ensure your financial data is protected.
             </p>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
-            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mb-4">
-                <i class="fas fa-eye text-white text-xl"></i>
+        <!-- Transparency -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-eye text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Complete Transparency</h3>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Our Vision</h3>
-            <p class="text-gray-600 leading-relaxed">
-                To become the leading digital platform for informal financial systems in Ethiopia, 
-                bridging traditional community practices with modern financial management tools.
+            <p class="text-gray-600">
+                Real-time transaction tracking, detailed reports, and audit trails ensure 
+                everyone can see exactly where funds are going.
+            </p>
+        </div>
+
+        <!-- Efficiency -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-bolt text-purple-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Digital Efficiency</h3>
+            </div>
+            <p class="text-gray-600">
+                Automated calculations, instant notifications, and mobile access replace 
+                manual bookkeeping and reduce errors.
+            </p>
+        </div>
+
+        <!-- Community -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-yellow-500">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-users text-yellow-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Community Focused</h3>
+            </div>
+            <p class="text-gray-600">
+                Designed with community trust at its core, supporting group dynamics while 
+                providing individual financial management.
             </p>
         </div>
     </div>
 
-    <!-- Features Grid -->
-    <div class="mb-16">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose IqubLedger?</h2>
+    <!-- How It Works -->
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white mb-12">
+        <h2 class="text-3xl font-bold mb-8 text-center">How It Works</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
-                <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-shield-alt text-indigo-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">1</span>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Bank-Level Security</h3>
-                <p class="text-gray-600">Your financial data is protected with enterprise-grade security measures.</p>
+                <h3 class="text-xl font-bold mb-2">Create Group</h3>
+                <p>Set up your Iqub group with members and contribution rules</p>
             </div>
-
             <div class="text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">2</span>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Real-time Analytics</h3>
-                <p class="text-gray-600">Monitor your Iqub's performance with live financial dashboards.</p>
+                <h3 class="text-xl font-bold mb-2">Track Contributions</h3>
+                <p>Record payments and monitor balances in real-time</p>
             </div>
-
             <div class="text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-mobile-alt text-blue-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">3</span>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Mobile Friendly</h3>
-                <p class="text-gray-600">Access your Iqub account from any device, anywhere, anytime.</p>
+                <h3 class="text-xl font-bold mb-2">Manage Payouts</h3>
+                <p>Process distributions with complete transparency</p>
             </div>
         </div>
     </div>
 
-    <!-- Founder Section -->
-    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white mb-16">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-6">Meet the Founder</h2>
-            <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8">
-                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-user-tie text-indigo-600 text-4xl"></i>
-                </div>
-                <div class="text-left max-w-2xl">
-                    <h3 class="text-2xl font-bold mb-2">Abinet Endale</h3>
-                    <p class="text-indigo-100 mb-4">Founder & Lead Developer</p>
-                    <p class="text-indigo-100 leading-relaxed">
-                        With a passion for financial technology and deep understanding of Ethiopian community banking systems, 
-                        Abinet founded IqubLedger to modernize traditional Iqub practices while preserving their cultural significance.
-                    </p>
-                    <div class="mt-4 flex flex-wrap gap-4">
-                        <div class="flex items-center">
-                            <i class="fas fa-phone mr-2"></i>
-                            +251-948-713-566
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fab fa-telegram mr-2"></i>
-                            @fintechcompany1
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            Bale Robe, Ethiopia
-                        </div>
-                    </div>
-                </div>
+    <!-- Team Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Our Commitment</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-bold text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-lock text-green-600 mr-2"></i>
+                    Data Privacy
+                </h3>
+                <p class="text-gray-600 text-sm">
+                    Your financial data is encrypted and never shared with third parties. 
+                    We comply with data protection regulations.
+                </p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-bold text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-headset text-blue-600 mr-2"></i>
+                    Support
+                </h3>
+                <p class="text-gray-600 text-sm">
+                    24/7 customer support and comprehensive documentation to help you 
+                    make the most of the platform.
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Stats Section -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        <div>
-            <div class="text-3xl font-bold text-indigo-600 mb-2">500+</div>
-            <div class="text-gray-600">Active Users</div>
+    <!-- Call to Action -->
+    <div class="text-center bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+        <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+            Join hundreds of Iqub groups who have already modernized their financial management 
+            with our secure, transparent platform.
+        </p>
+        <div class="space-x-4">
+            {% if session.user_id %}
+            <a href="/dashboard" 
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-lg text-white bg-indigo-600 hover:bg-indigo-700">
+                Go to Dashboard
+            </a>
+            {% else %}
+            <a href="/register" 
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-lg text-white bg-green-600 hover:bg-green-700">
+                Create Free Account
+            </a>
+            <a href="/login" 
+               class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50">
+                Sign In
+            </a>
+            {% endif %}
         </div>
-        <div>
-            <div class="text-3xl font-bold text-indigo-600 mb-2">50+</div>
-            <div class="text-gray-600">Iqub Groups</div>
-        </div>
-        <div>
-            <div class="text-3xl font-bold text-indigo-600 mb-2">1M+</div>
-            <div class="text-gray-600">Birr Managed</div>
-        </div>
-        <div>
-            <div class="text-3xl font-bold text-indigo-600 mb-2">100%</div>
-            <div class="text-gray-600">Satisfaction</div>
-        </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="mt-12 text-center text-gray-500 text-sm">
+        <p>© 2024 IqubLedger. All rights reserved.</p>
+        <p class="mt-2">
+            <a href="/contact" class="text-indigo-600 hover:text-indigo-800">Contact Us</a> • 
+            <a href="#" class="text-indigo-600 hover:text-indigo-800">Privacy Policy</a> • 
+            <a href="#" class="text-indigo-600 hover:text-indigo-800">Terms of Service</a>
+        </p>
     </div>
 </div>
 {% endblock %}
