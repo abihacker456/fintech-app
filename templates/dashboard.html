@@ -4,397 +4,330 @@
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Header and Welcome Section -->
+    <!-- Welcome Header -->
     <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-                <h1 class="text-4xl font-extrabold mb-2">
-                    Welcome back, {{ session.user_name }}!
-                </h1>
-                <p class="text-indigo-100 text-xl">
-                    Your personal financial overview for <strong>{{ current_user.group_name if current_user else 'your group' }}</strong>
-                </p>
-                <div class="flex items-center mt-4 space-x-4">
-                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
-                        <i class="fas fa-users mr-1"></i>
-                        {{ group_members|length + 1 }} group members
-                    </span>
-                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
-                        <i class="fas {% if session.is_admin %}fa-crown{% else %}fa-user{% endif %} mr-1"></i>
-                        {% if session.is_admin %}Administrator{% else %}Member{% endif %}
-                    </span>
-                </div>
-            </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <div class="text-2xl font-bold text-indigo-100">Today</div>
-                <div class="text-3xl font-bold">{{ today_date }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="space-y-3">
-                {% for category, message in messages %}
-                    <div class="p-4 rounded-xl border-l-4 {% if category == 'success' %}bg-green-50 border-green-400 text-green-700{% elif category == 'error' %}bg-red-50 border-red-400 text-red-700{% else %}bg-blue-50 border-blue-400 text-blue-700{% endif %}">
-                        <div class="flex items-center">
-                            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-3"></i>
-                            <p class="font-medium">{{ message }}</p>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <!-- Key Metrics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Current Balance -->
-        <div class="bg-white shadow-xl rounded-xl p-6 transition duration-300 hover:shadow-2xl border-t-4 border-indigo-500 card-hover">
-            <div class="flex items-center mb-2">
-                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
-                    <i class="fas fa-wallet text-indigo-600"></i>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Current Balance</p>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <span class="text-4xl font-bold text-gray-900">
-                    {{ "{:,.2f}".format(current_user.balance) }}
-                </span>
-                <span class="text-xl font-semibold text-indigo-600">Birr</span>
-            </div>
-            <p class="text-xs text-gray-400 mt-2">Your available balance for withdrawal</p>
-        </div>
-
-        <!-- Group Info -->
-        <div class="bg-white shadow-xl rounded-xl p-6 transition duration-300 hover:shadow-2xl border-t-4 border-green-500 card-hover">
-            <div class="flex items-center mb-2">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <i class="fas fa-users text-green-600"></i>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Your Group</p>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <span class="text-2xl font-bold text-gray-900">
-                    {{ current_user.group_name }}
-                </span>
-            </div>
-            <p class="text-xs text-gray-400 mt-2">{{ group_members|length }} other members in your group</p>
-        </div>
-
-        <!-- Role & Status -->
-        <div class="bg-white shadow-xl rounded-xl p-6 transition duration-300 hover:shadow-2xl border-t-4 border-blue-500 card-hover">
-            <div class="flex items-center mb-2">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <i class="fas {% if session.is_admin %}fa-crown{% else %}fa-user{% endif %} text-blue-600"></i>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Your Role</p>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <span class="text-2xl font-bold text-gray-900">
-                    {% if session.is_admin %}Administrator{% else %}Member{% endif %}
-                </span>
-            </div>
-            <p class="text-xs text-gray-400 mt-2">
-                {% if session.is_admin %}Full system access{% else %}Deposit contributions only{% endif %}
-            </p>
-        </div>
-    </div>
-
-    <!-- Action Cards Grid - Now 3 columns -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Make Contribution Card -->
-        <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
-                    <i class="fas fa-plus-circle text-green-600 text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900">Make Contribution</h3>
-                    <p class="text-sm text-gray-600">Add funds to your account</p>
-                </div>
-            </div>
-            
-            <form action="/make_contribution" method="POST" class="space-y-4">
-                <div>
-                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
-                        Amount (Birr)
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500 font-semibold">ETB</span>
-                        </div>
-                        <input type="number" name="amount" id="amount" step="0.01" min="1" required
-                               class="block w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 font-bold text-lg text-gray-900"
-                               placeholder="0.00">
-                    </div>
-                </div>
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                        Description (Optional)
-                    </label>
-                    <input type="text" name="description" id="description"
-                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                           placeholder="Weekly contribution, Special payment, etc.">
-                </div>
-                <button type="submit"
-                        class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 font-medium text-lg">
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    Submit Contribution
-                </button>
-            </form>
-            
-            <div class="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div class="flex items-center text-sm text-green-700">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <span>Contributions are immediately added to your balance</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Group Members Card -->
-        <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
-                    <i class="fas fa-users text-blue-600 text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900">Group Members</h3>
-                    <p class="text-sm text-gray-600">{{ group_members|length + 1 }} total members</p>
-                </div>
-            </div>
-
-            {% if group_members %}
-                <div class="space-y-3 max-h-80 overflow-y-auto">
-                    <!-- Current User -->
-                    <div class="flex justify-between items-center p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-user text-white text-xs"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">{{ current_user.name }}</p>
-                                <p class="text-xs text-gray-500">You</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-gray-900">{{ "{:,.2f}".format(current_user.balance) }} Birr</p>
-                            <p class="text-xs text-indigo-600 font-medium">Current</p>
-                        </div>
-                    </div>
-
-                    <!-- Other Members -->
-                    {% for member in group_members %}
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition duration-150">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                                    <i class="fas fa-user text-white text-xs"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ member.name }}</p>
-                                    <p class="text-xs text-gray-500">{{ member.phone }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-900">{{ "{:,.2f}".format(member.balance) }} Birr</p>
-                                <p class="text-xs text-gray-500">Balance</p>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-8">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-users text-gray-400"></i>
-                    </div>
-                    <p class="text-gray-500">No other members in your group yet.</p>
-                </div>
+        <h1 class="text-4xl font-bold mb-2">Welcome, {{ session.user_name }}!</h1>
+        <p class="text-indigo-100 text-lg">
+            <i class="fas fa-users mr-2"></i>
+            Group: {{ user.group_name }}
+            {% if session.is_admin %}
+            <span class="ml-4 bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">
+                <i class="fas fa-crown mr-1"></i>Administrator
+            </span>
             {% endif %}
-        </div>
+        </p>
+        <p class="text-indigo-100 mt-2">
+            <i class="far fa-calendar mr-1"></i>
+            Joined: {{ user.date_joined or user.created_at[:10] }}
+        </p>
+    </div>
 
-        <!-- Mobile App Download Card - NEW CARD -->
-        <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
-                    <i class="fas fa-mobile-alt text-purple-600 text-xl"></i>
+    <!-- Financial Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Current Balance -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 card-hover">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-wallet text-indigo-600 text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-gray-900">Mobile App</h3>
-                    <p class="text-sm text-gray-600">Download our Android app</p>
+                    <p class="text-sm text-gray-500">Current Balance</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {{ "{:,.2f}".format(user.balance) }} Birr
+                    </p>
                 </div>
             </div>
-            
-            <div class="space-y-4">
-                <a href="https://drive.google.com/file/d/1BUh69rbeXmwVIfDKS4P-Mkt3T60xaKtE/view?usp=sharing" 
-                   target="_blank"
-                   class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 font-medium text-lg text-center block">
-                    <i class="fas fa-download mr-2"></i>
-                    Download APK
-                </a>
-                
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <div class="flex items-start">
-                        <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5 mr-2"></i>
-                        <div class="text-sm text-yellow-700">
-                            <strong>Test Version:</strong> This is a demo app for testing only. 
-                            Install at your own risk.
-                        </div>
-                    </div>
+            <p class="text-xs text-gray-400 mt-2">Available for withdrawal</p>
+        </div>
+
+        <!-- Total Contributed -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500 card-hover">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-arrow-up text-green-600 text-xl"></i>
                 </div>
-                
-                <details class="text-sm text-gray-600">
-                    <summary class="cursor-pointer font-medium">Installation Instructions</summary>
-                    <ol class="mt-2 space-y-1 list-decimal list-inside">
-                        <li>Click download button above</li>
-                        <li>Open Google Drive app on your phone</li>
-                        <li>Tap "Download" on the APK file</li>
-                        <li>Open Downloads folder and tap the APK</li>
-                        <li>Allow "Install from unknown sources" if prompted</li>
-                        <li>Tap "Install" and open the app</li>
-                    </ol>
-                </details>
+                <div>
+                    <p class="text-sm text-gray-500">Total Contributed</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {{ "{:,.2f}".format(total_contributed) }} Birr
+                    </p>
+                </div>
             </div>
+            <p class="text-xs text-gray-400 mt-2">All time contributions</p>
+        </div>
+
+        <!-- Total Received -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 card-hover">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-arrow-down text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Received</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {{ "{:,.2f}".format(total_received) }} Birr
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">Withdrawals & payouts</p>
+        </div>
+
+        <!-- Net Position -->
+        {% set net_position = total_contributed - total_received %}
+        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 
+            {% if net_position >= 0 %}border-emerald-500{% else %}border-amber-500{% endif %} card-hover">
+            <div class="flex items-center">
+                <div class="w-12 h-12 {% if net_position >= 0 %}bg-emerald-100{% else %}bg-amber-100{% endif %} rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-scale-balanced {% if net_position >= 0 %}text-emerald-600{% else %}text-amber-600{% endif %} text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Net Position</p>
+                    <p class="text-2xl font-bold {% if net_position >= 0 %}text-emerald-700{% else %}text-amber-700{% endif %}">
+                        {{ "{:,.2f}".format(net_position) }} Birr
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs {% if net_position >= 0 %}text-emerald-600{% else %}text-amber-600{% endif %} mt-2 font-medium">
+                {% if net_position > 0 %}
+                    🟢 In positive position
+                {% elif net_position < 0 %}
+                    🟡 Received more than contributed
+                {% else %}
+                    ⚪️ Account balanced
+                {% endif %}
+            </p>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <a href="/contribute" class="bg-white p-4 rounded-xl shadow-md card-hover text-center border border-gray-200">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-plus-circle text-green-600 text-xl"></i>
-            </div>
-            <p class="font-medium text-gray-900">Contribute</p>
-            <p class="text-xs text-gray-500">Add Funds</p>
-        </a>
-        
-        <a href="/transactions" class="bg-white p-4 rounded-xl shadow-md card-hover text-center border border-gray-200">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-exchange-alt text-blue-600 text-xl"></i>
-            </div>
-            <p class="font-medium text-gray-900">Transactions</p>
-            <p class="text-xs text-gray-500">View History</p>
-        </a>
-        
-        <a href="/profile" class="bg-white p-4 rounded-xl shadow-md card-hover text-center border border-gray-200">
-            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-user text-purple-600 text-xl"></i>
-            </div>
-            <p class="font-medium text-gray-900">Profile</p>
-            <p class="text-xs text-gray-500">My Account</p>
-        </a>
-        
-        {% if session.is_admin %}
-        <a href="/withdraw" class="bg-white p-4 rounded-xl shadow-md card-hover text-center border border-gray-200">
-            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-money-bill-wave text-red-600 text-xl"></i>
-            </div>
-            <p class="font-medium text-gray-900">Withdraw</p>
-            <p class="text-xs text-gray-500">Admin Only</p>
-        </a>
-        {% else %}
-        <a href="/about" class="bg-white p-4 rounded-xl shadow-md card-hover text-center border border-gray-200">
-            <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-info-circle text-gray-600 text-xl"></i>
-            </div>
-            <p class="font-medium text-gray-900">About</p>
-            <p class="text-xs text-gray-500">Learn More</p>
-        </a>
-        {% endif %}
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Contribute -->
+            <a href="/contribute" class="bg-green-600 hover:bg-green-700 text-white p-6 rounded-xl text-center card-hover transition duration-150">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-plus-circle text-3xl mb-3"></i>
+                    <p class="font-bold text-lg">Contribute</p>
+                    <p class="text-green-100 text-sm mt-1">Add funds</p>
+                </div>
+            </a>
+            
+            <!-- View Transactions -->
+            <a href="/transactions" class="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-xl text-center card-hover transition duration-150">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-exchange-alt text-3xl mb-3"></i>
+                    <p class="font-bold text-lg">Transactions</p>
+                    <p class="text-blue-100 text-sm mt-1">View history</p>
+                </div>
+            </a>
+            
+            <!-- My Status -->
+            <a href="/my_status" class="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-xl text-center card-hover transition duration-150">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-chart-line text-3xl mb-3"></i>
+                    <p class="font-bold text-lg">My Status</p>
+                    <p class="text-purple-100 text-sm mt-1">Financial overview</p>
+                </div>
+            </a>
+            
+            <!-- Admin Actions -->
+            {% if session.is_admin %}
+            <a href="/payout" class="bg-red-600 hover:bg-red-700 text-white p-6 rounded-xl text-center card-hover transition duration-150">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-hand-holding-usd text-3xl mb-3"></i>
+                    <p class="font-bold text-lg">Payout</p>
+                    <p class="text-red-100 text-sm mt-1">Process payment</p>
+                </div>
+            </a>
+            {% else %}
+            <a href="/members" class="bg-indigo-600 hover:bg-indigo-700 text-white p-6 rounded-xl text-center card-hover transition duration-150">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-users text-3xl mb-3"></i>
+                    <p class="font-bold text-lg">Members</p>
+                    <p class="text-indigo-100 text-sm mt-1">Group members</p>
+                </div>
+            </a>
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Recent Transactions Section -->
-    <div class="bg-white shadow-xl rounded-xl p-6 border border-gray-100 card-hover">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">
-                Recent Group Transactions
-            </h2>
-            <a href="/transactions" class="text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
-                View All
-                <i class="fas fa-arrow-right ml-1"></i>
-            </a>
-        </div>
-        
-        {% if recent_transactions %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Member
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Type
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Amount
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for transaction in recent_transactions %}
-                    <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ transaction.date[:10] }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {% if transaction.user_id == session.user_id %}
-                                <span class="text-indigo-600">You</span>
-                            {% else %}
-                                {{ transaction.user_name }}
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {% if transaction.type == 'contribution' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                                <i class="fas {% if transaction.type == 'contribution' %}fa-arrow-up mr-1{% else %}fa-arrow-down mr-1{% endif %}"></i>
-                                {{ transaction.type|title }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold 
-                            {% if transaction.type == 'contribution' %}text-green-600{% else %}text-blue-600{% endif %}">
-                            {{ "{:,.2f}".format(transaction.amount) }} Birr
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
-                            {{ transaction.description or '—' }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-10 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-            <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No Transactions Yet</h3>
-            <p class="mt-1 text-sm text-gray-500">
-                Start by making your first contribution.
-            </p>
-            <div class="mt-6">
-                <a href="/contribute" class="btn-primary">
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    Make a Contribution
+    <!-- Recent Transactions & Group Members -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Recent Transactions</h2>
+                <a href="/transactions" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
+            
+            {% if recent_transactions %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for tx in recent_transactions %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                {{ tx.date[:10] }}<br>
+                                <span class="text-gray-500 text-xs">{{ tx.date[11:16] }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                {{ tx.user_name }}
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    {% if tx.type == 'contribution' %}bg-green-100 text-green-800
+                                    {% elif tx.type == 'withdrawal' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                    <i class="fas 
+                                        {% if tx.type == 'contribution' %}fa-arrow-up mr-1
+                                        {% elif tx.type == 'withdrawal' %}fa-arrow-down mr-1
+                                        {% else %}fa-hand-holding-usd mr-1{% endif %}"></i>
+                                    {{ tx.type|title }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-bold 
+                                {% if tx.type == 'contribution' %}text-green-700
+                                {% elif tx.type == 'withdrawal' %}text-blue-700
+                                {% else %}text-purple-700{% endif %}">
+                                {{ "{:,.2f}".format(tx.amount) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-exchange-alt text-4xl text-gray-300 mb-3"></i>
+                <p>No transactions yet. Start by making a contribution!</p>
+                <a href="/contribute" class="btn-primary mt-4 inline-block">
+                    <i class="fas fa-plus-circle mr-2"></i>Make First Contribution
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Add today's date variable -->
-<script>
-    const today = new Date();
-    const todayDate = today.toISOString().split('T')[0];
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('[id="today_date"]').textContent = todayDate;
-    });
-</script>
+        <!-- Group Members -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Group Members</h2>
+                <a href="/members" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            {% if members %}
+            <div class="space-y-4">
+                {% for member in members %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <a href="/member/{{ member.id }}" class="font-medium text-gray-900 hover:text-indigo-600">
+                                {{ member.name }}
+                            </a>
+                            <p class="text-sm text-gray-500">{{ member.phone }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-900">{{ "{:,.2f}".format(member.balance) }} Birr</p>
+                        <p class="text-xs text-gray-500">Balance</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Group Summary -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500">Total Members</p>
+                        <p class="text-lg font-bold text-gray-900">{{ members|length + 1 }}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500">Group Balance</p>
+                        <p class="text-lg font-bold text-green-600">
+                            {% set group_balance = user.balance %}
+                            {% for member in members %}
+                                {% set group_balance = group_balance + member.balance %}
+                            {% endfor %}
+                            {{ "{:,.2f}".format(group_balance) }} Birr
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-users text-4xl text-gray-300 mb-3"></i>
+                <p>No other members in your group yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Admin Only Section -->
+    {% if session.is_admin and all_groups %}
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-crown mr-2 text-yellow-500"></i>
+            Admin Overview
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- System Statistics -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-3">System Statistics</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Users:</span>
+                        <span class="font-bold">{{ all_users|length }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Groups:</span>
+                        <span class="font-bold">{{ all_groups|length }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Admin Actions -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-3">Quick Actions</h3>
+                <div class="space-y-2">
+                    <a href="/admin" class="block w-full btn-primary text-center py-2">
+                        <i class="fas fa-crown mr-2"></i>Admin Dashboard
+                    </a>
+                    <a href="/payout" class="block w-full btn-success text-center py-2">
+                        <i class="fas fa-hand-holding-usd mr-2"></i>Process Payout
+                    </a>
+                    <a href="/admin/security-audit" class="block w-full btn-danger text-center py-2">
+                        <i class="fas fa-shield-alt mr-2"></i>Security Audit
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Export Data -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-3">Export Data</h3>
+                <a href="/export/transactions/csv" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-lg transition duration-150">
+                    <i class="fas fa-download mr-2"></i>Export Transactions (CSV)
+                </a>
+                <p class="text-xs text-gray-500 mt-2">Export all transaction data for reporting</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
