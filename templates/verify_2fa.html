@@ -5,6 +5,7 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
         <div class="text-center">
             <div class="mx-auto w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mb-4">
                 <i class="fas fa-shield-alt text-white text-2xl"></i>
@@ -13,32 +14,166 @@
             <p class="mt-2 text-sm text-gray-600">Enter the code from your authenticator app</p>
         </div>
 
+        <!-- Verification Form -->
         <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
             <form class="space-y-6" action="/verify-2fa" method="POST">
+                <!-- Verification Code -->
                 <div>
                     <label for="totp_code" class="block text-sm font-medium text-gray-700 mb-1">
                         6-Digit Verification Code
                     </label>
-                    <input type="text" id="totp_code" name="totp_code" required
-                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 text-center text-xl font-mono tracking-widest"
-                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code">
-                    <p class="text-xs text-gray-500 mt-1">Open your authenticator app to get the verification code</p>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-mobile-alt text-gray-400"></i>
+                        </div>
+                        <input type="text" id="totp_code" name="totp_code" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-150 text-center text-xl font-mono tracking-widest"
+                               placeholder="000000"
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               autocomplete="one-time-code"
+                               oninput="formatCode(this)">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Open your authenticator app to get the verification code
+                    </p>
                 </div>
 
+                <!-- Timer -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-purple-500 mr-2"></i>
+                            <span class="text-sm text-purple-700">Code expires in:</span>
+                        </div>
+                        <div id="timer" class="text-lg font-bold text-purple-600">
+                            30 seconds
+                        </div>
+                    </div>
+                    <div class="w-full bg-purple-200 rounded-full h-2 mt-2">
+                        <div id="timer-bar" class="bg-purple-600 h-2 rounded-full" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-150 font-medium">
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 font-medium">
                     <i class="fas fa-check-circle mr-2"></i>
                     Verify & Continue
                 </button>
 
-                <div class="text-center">
-                    <a href="/login" class="font-medium text-gray-600 hover:text-gray-500">
+                <!-- Alternative Options -->
+                <div class="text-center space-y-3">
+                    <a href="/login" class="block font-medium text-gray-600 hover:text-gray-500">
                         <i class="fas fa-arrow-left mr-1"></i>
                         Back to Login
                     </a>
+                    <a href="#" onclick="resendCode()" class="block font-medium text-purple-600 hover:text-purple-500 text-sm">
+                        <i class="fas fa-redo mr-1"></i>
+                        Resend verification code
+                    </a>
                 </div>
             </form>
+
+            <!-- Help Section -->
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    Need Help?
+                </h4>
+                <div class="text-xs text-blue-700 space-y-2">
+                    <p><strong>Can't access your authenticator app?</strong></p>
+                    <p>• Make sure your device time is synchronized</p>
+                    <p>• Check that you're using the correct account</p>
+                    <p>• Try resending the verification code</p>
+                    <p class="mt-2">
+                        <a href="/contact" class="underline">Contact support</a> if you need assistance
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+// Format the code input (add spaces for readability)
+function formatCode(input) {
+    let value = input.value.replace(/\s/g, '');
+    value = value.replace(/(\d{3})(?=\d)/g, '$1 ');
+    input.value = value.substring(0, 7); // Max 6 digits + space
+}
+
+// Timer for code expiry
+let timeLeft = 30;
+const timerElement = document.getElementById('timer');
+const timerBar = document.getElementById('timer-bar');
+
+function updateTimer() {
+    timeLeft--;
+    
+    if (timeLeft <= 0) {
+        timerElement.textContent = 'Expired!';
+        timerBar.style.width = '0%';
+        timerBar.style.backgroundColor = '#ef4444';
+        
+        // Disable the input and show message
+        document.getElementById('totp_code').disabled = true;
+        document.getElementById('totp_code').placeholder = 'Code expired';
+        
+        clearInterval(timerInterval);
+        
+        // Show refresh option
+        const timerDiv = document.querySelector('.bg-purple-50');
+        timerDiv.innerHTML = `
+            <div class="text-center">
+                <p class="text-red-600 font-medium mb-2">Code expired</p>
+                <button onclick="refreshCode()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm">
+                    <i class="fas fa-redo mr-1"></i>Get New Code
+                </button>
+            </div>
+        `;
+    } else {
+        timerElement.textContent = `${timeLeft} second${timeLeft === 1 ? '' : 's'}`;
+        const percentage = (timeLeft / 30) * 100;
+        timerBar.style.width = `${percentage}%`;
+        
+        // Change color as time runs out
+        if (timeLeft <= 10) {
+            timerBar.style.backgroundColor = '#ef4444'; // Red
+        } else if (timeLeft <= 20) {
+            timerBar.style.backgroundColor = '#f59e0b'; // Yellow
+        }
+    }
+}
+
+let timerInterval = setInterval(updateTimer, 1000);
+
+// Manual refresh function
+function refreshCode() {
+    if (confirm('Get a new verification code?')) {
+        // This would typically make an API call to refresh the code
+        location.reload(); // Simple reload for now
+    }
+}
+
+// Resend code function
+function resendCode() {
+    if (confirm('Send a new verification code?')) {
+        // This would typically make an API call to resend
+        alert('New verification code sent!');
+        location.reload(); // Simple reload for now
+    }
+}
+
+// Auto-submit when 6 digits entered
+document.getElementById('totp_code').addEventListener('input', function(e) {
+    const code = this.value.replace(/\s/g, '');
+    if (code.length === 6) {
+        // Auto-submit after short delay
+        setTimeout(() => {
+            document.querySelector('form').submit();
+        }, 500);
+    }
+});
+</script>
 {% endblock %}
