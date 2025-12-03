@@ -4,86 +4,175 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
+    <!-- Header -->
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900">
+            <i class="fas fa-plus-circle text-green-600 mr-2"></i>
             Make Contribution
         </h1>
         <p class="mt-2 text-lg text-gray-600">
-            Submit your weekly Iqub contribution securely
+            Add funds to your Iqub account
         </p>
+        <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p class="text-green-800 font-medium">
+                <i class="fas fa-wallet mr-2"></i>
+                Current Balance: {{ "{:,.2f}".format(current_user.balance if current_user else 0) }} Birr
+            </p>
+        </div>
     </div>
 
+    <!-- Contribution Form -->
     <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border border-gray-100">
-        <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div class="flex items-center">
-                <i class="fas fa-user-circle text-green-600 text-xl mr-3"></i>
-                <div>
-                    <p class="font-semibold text-green-800">Contributing as: {{ session.user_name }}</p>
-                    <p class="text-sm text-green-600">Your contribution will be recorded immediately</p>
-                </div>
-            </div>
-        </div>
-
         <form class="space-y-6" action="/contribute" method="POST">
+            <!-- Amount -->
             <div>
                 <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
                     Contribution Amount (Birr)
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500 font-semibold">ETB</span>
+                        <span class="text-gray-500 sm:text-sm"> Birr</span>
                     </div>
                     <input type="number" name="amount" id="amount" step="0.01" min="1" required
-                           class="block w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 font-bold text-lg text-gray-900"
-                           placeholder="0.00">
+                           class="block w-full pl-16 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 font-semibold text-lg text-green-700"
+                           placeholder="0.00"
+                           oninput="updatePreview()">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                    Enter the amount you wish to contribute
+                </p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="description" name="description" rows="3"
+                          class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150"
+                          placeholder="e.g., Monthly contribution, Special deposit, etc."></textarea>
+                <p class="mt-1 text-sm text-gray-500">
+                    Optional: Add a note for your records
+                </p>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="preview" class="hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-green-800 mb-4">Contribution Preview</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Current Balance:</span>
+                            <span class="font-semibold">{{ "{:,.2f}".format(current_user.balance if current_user else 0) }} Birr</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Contribution Amount:</span>
+                            <span class="font-bold text-green-700" id="preview-amount">0.00 Birr</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">New Balance:</span>
+                            <span class="font-bold text-indigo-700" id="preview-new-balance">0.00 Birr</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-green-600 mt-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        This transaction will be recorded permanently
+                    </p>
                 </div>
             </div>
 
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Contribution Description
-                </label>
-                <input type="text" name="description" id="description"
-                       class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                       placeholder="e.g., Weekly contribution, Special payment, etc.">
-                <p class="mt-1 text-sm text-gray-500">Optional: Add a note for this contribution</p>
-            </div>
-
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <!-- Security Notice -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle text-blue-400"></i>
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm text-blue-700">
-                            <strong>Note:</strong> Your contribution will be immediately added to your account balance and visible to group administrators.
+                        <p class="text-sm text-yellow-700">
+                            <strong>Important:</strong> Contributions are permanent and cannot be reversed.
+                            Please double-check the amount before confirming.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <button type="submit"
-                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 font-medium text-lg">
-                <i class="fas fa-plus-circle mr-2"></i>
-                Submit Contribution
-            </button>
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 font-medium text-lg">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Confirm Contribution
+                </button>
+            </div>
+
+            <!-- Cancel Link -->
+            <div class="text-center pt-4">
+                <a href="/dashboard" class="text-gray-600 hover:text-gray-900 font-medium">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Cancel and return to Dashboard
+                </a>
+            </div>
         </form>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="/dashboard" class="bg-white p-4 rounded-lg shadow-md card-hover text-center border border-gray-200">
-            <i class="fas fa-tachometer-alt text-indigo-600 text-xl mb-2"></i>
-            <p class="font-medium text-gray-900">Dashboard</p>
-        </a>
-        <a href="/transactions" class="bg-white p-4 rounded-lg shadow-md card-hover text-center border border-gray-200">
-            <i class="fas fa-exchange-alt text-blue-600 text-xl mb-2"></i>
-            <p class="font-medium text-gray-900">Transactions</p>
-        </a>
-        <a href="/profile" class="bg-white p-4 rounded-lg shadow-md card-hover text-center border border-gray-200">
-            <i class="fas fa-user text-green-600 text-xl mb-2"></i>
-            <p class="font-medium text-gray-900">My Profile</p>
-        </a>
+    <!-- Recent Contributions -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Your Recent Contributions</h2>
+        {% if recent_contributions %}
+        <div class="space-y-3">
+            {% for contribution in recent_contributions[:5] %}
+            <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <div>
+                    <p class="font-medium text-gray-900">{{ contribution.description or 'Contribution' }}</p>
+                    <p class="text-xs text-gray-500">{{ contribution.date[:10] }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-green-700">{{ "{:,.2f}".format(contribution.amount) }} Birr</p>
+                    <p class="text-xs text-gray-500">Balance: {{ "{:,.2f}".format(contribution.balance_after) }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">No contributions yet. Make your first one above!</p>
+        {% endif %}
     </div>
 </div>
+
+<script>
+function updatePreview() {
+    const amountInput = document.getElementById('amount');
+    const previewDiv = document.getElementById('preview');
+    const previewAmount = document.getElementById('preview-amount');
+    const previewNewBalance = document.getElementById('preview-new-balance');
+    
+    const amount = parseFloat(amountInput.value) || 0;
+    const currentBalance = {{ current_user.balance if current_user else 0 }};
+    const newBalance = currentBalance + amount;
+    
+    if (amount > 0) {
+        previewDiv.classList.remove('hidden');
+        previewAmount.textContent = amount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' Birr';
+        previewNewBalance.textContent = newBalance.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' Birr';
+    } else {
+        previewDiv.classList.add('hidden');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    if (amountInput) {
+        amountInput.addEventListener('input', updatePreview);
+        amountInput.addEventListener('change', updatePreview);
+    }
+});
+</script>
 {% endblock %}
