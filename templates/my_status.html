@@ -4,56 +4,119 @@
 
 {% block content %}
 <div class="space-y-10">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white">
+        <div class="flex flex-col md:flex-row md:items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Hello, {{ member.full_name }}!</h1>
+                <p class="text-indigo-100 text-lg">
+                    Your personal financial status in the Iqub
+                </p>
+                <div class="flex flex-wrap gap-4 mt-3 text-indigo-100">
+                    <div class="flex items-center">
+                        <i class="fas fa-users mr-2"></i>
+                        {{ member.group_name }}
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Joined: {{ member.date_joined or member.created_at[:10] }}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="/dashboard" class="bg-white text-indigo-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-indigo-50 transition">
+                    <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
 
-    <header class="pb-4 border-b border-gray-200">
-        <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
-            Hello, {{ member.full_name }}!
-        </h1>
-        <p class="text-xl text-gray-600 mt-1">
-            Your personal financial status in the Iqub.
-        </p>
-    </header>
-
+    <!-- Financial Summary -->
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-
-        <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 border-green-500 p-6 transition duration-300 transform hover:scale-[1.01]">
-            <p class="text-sm font-medium text-gray-500 truncate">Total Contributed</p>
+        <!-- Total Contributed -->
+        <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 border-green-500 p-6 transition duration-300 transform hover:scale-[1.02]">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-arrow-up text-green-600"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-500">Total Contributed</p>
+            </div>
             <div class="mt-1 flex items-baseline">
                 <p class="text-3xl font-semibold text-green-700">
                     {{ "{:,.2f}".format(member.total_contributed) }}
                 </p>
                 <span class="ml-2 text-md font-medium text-gray-500">Birr</span>
             </div>
+            <p class="text-xs text-gray-400 mt-2">All contributions to the Iqub fund</p>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 border-indigo-500 p-6 transition duration-300 transform hover:scale-[1.01]">
-            <p class="text-sm font-medium text-gray-500 truncate">Amount Received (Payouts)</p>
+        <!-- Amount Received -->
+        <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 border-blue-500 p-6 transition duration-300 transform hover:scale-[1.02]">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-arrow-down text-blue-600"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-500">Amount Received</p>
+            </div>
             <div class="mt-1 flex items-baseline">
-                <p class="text-3xl font-semibold text-indigo-700">
+                <p class="text-3xl font-semibold text-blue-700">
                     {{ "{:,.2f}".format(member.amount_received) }}
                 </p>
                 <span class="ml-2 text-md font-medium text-gray-500">Birr</span>
             </div>
+            <p class="text-xs text-gray-400 mt-2">Payouts received from Iqub</p>
         </div>
 
+        <!-- Net Balance -->
         {% set net_balance = member.total_contributed - member.amount_received %}
         <div class="bg-white overflow-hidden shadow-2xl rounded-xl border-t-4 
-            {% if net_balance >= 0 %}border-blue-500{% else %}border-red-500{% endif %} p-6 transition duration-300 transform hover:scale-[1.01]">
-            <p class="text-sm font-medium text-gray-500 truncate">Net Balance (Your Equity)</p>
+            {% if net_balance >= 0 %}border-indigo-500{% else %}border-red-500{% endif %} p-6 transition duration-300 transform hover:scale-[1.02]">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 {% if net_balance >= 0 %}bg-indigo-100{% else %}bg-red-100{% endif %} rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-scale-balanced {% if net_balance >= 0 %}text-indigo-600{% else %}text-red-600{% endif %}"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-500">Net Balance (Your Equity)</p>
+            </div>
             <div class="mt-1 flex items-baseline">
                 <p class="text-3xl font-semibold 
-                    {% if net_balance >= 0 %}text-blue-700{% else %}text-red-700{% endif %}">
+                    {% if net_balance >= 0 %}text-indigo-700{% else %}text-red-700{% endif %}">
                     {{ "{:,.2f}".format(net_balance) }}
                 </p>
                 <span class="ml-2 text-md font-medium text-gray-500">Birr</span>
             </div>
+            <p class="text-xs {% if net_balance >= 0 %}text-indigo-600{% else %}text-red-600{% endif %} mt-2 font-medium">
+                {% if net_balance > 0 %}
+                    🟢 You have contributed more than received
+                {% elif net_balance < 0 %}
+                    🔴 You have received more than contributed
+                {% else %}
+                    ⚪️ Your account is balanced
+                {% endif %}
+            </p>
         </div>
     </div>
 
+    <!-- Current Balance Card -->
+    <div class="bg-gradient-to-r from-indigo-100 to-purple-100 border border-indigo-200 rounded-xl p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-bold text-gray-900">Current Account Balance</h3>
+                <p class="text-gray-600">Available for future withdrawals or payouts</p>
+            </div>
+            <div class="text-right">
+                <p class="text-4xl font-bold text-indigo-700">
+                    {{ "{:,.2f}".format(member.balance) }} Birr
+                </p>
+                <p class="text-sm text-gray-500">Real-time updated balance</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action -->
     <div class="flex justify-end pt-4">
-        <a href="{{ url_for('contribution') }}"
-           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 transform hover:scale-[1.02]">
-            <svg class="-ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <a href="/contribute"
+           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 transform hover:scale-[1.02]">
+            <svg class="-ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
             </svg>
             Make a New Contribution
@@ -62,12 +125,14 @@
 
     <!-- History Tables Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-6">
-
         <!-- Contribution History -->
         <div class="bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-100">
             <div class="p-5 border-b bg-gray-50">
                 <h2 class="text-2xl font-semibold text-gray-800">Contribution History</h2>
-                <p class="text-sm text-gray-500">All money paid into the Iqub.</p>
+                <p class="text-sm text-gray-500">All money paid into the Iqub</p>
+                <div class="mt-2 text-xs text-gray-600">
+                    Total: {{ "{:,.2f}".format(member.total_contributed) }} Birr
+                </div>
             </div>
             <div class="overflow-y-auto max-h-96">
                 {% if contributions %}
@@ -76,30 +141,46 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (Birr)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for contribution in contributions %}
-                        <tr class="hover:bg-green-50/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ contribution.contribution_date }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-700">{{ "{:,.2f}".format(contribution.amount) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{{ contribution.transaction_id or 'N/A' }}</td>
+                        <tr class="hover:bg-green-50/50 transition duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="font-medium">{{ contribution.date[:10] }}</div>
+                                <div class="text-gray-500 text-xs">{{ contribution.date[11:16] }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-700">
+                                {{ "{:,.2f}".format(contribution.amount) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                {{ contribution.description or 'Contribution' }}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center py-10 text-gray-500">No contributions recorded yet.</div>
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-arrow-up text-3xl text-gray-300 mb-3"></i>
+                    <p>No contributions recorded yet.</p>
+                    <a href="/contribute" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mt-2 inline-block">
+                        Make your first contribution
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Payout/Receipt History -->
+        <!-- Payout History -->
         <div class="bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-100">
             <div class="p-5 border-b bg-gray-50">
                 <h2 class="text-2xl font-semibold text-gray-800">Payout History</h2>
-                <p class="text-sm text-gray-500">Money received from the Iqub.</p>
+                <p class="text-sm text-gray-500">Money received from the Iqub</p>
+                <div class="mt-2 text-xs text-gray-600">
+                    Total: {{ "{:,.2f}".format(member.amount_received) }} Birr
+                </div>
             </div>
             <div class="overflow-y-auto max-h-96">
                 {% if payouts %}
@@ -108,26 +189,83 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (Birr)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for payout in payouts %}
-                        <tr class="hover:bg-indigo-50/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ payout.payout_date }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-700">{{ "{:,.2f}".format(payout.amount) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{{ payout.reference or 'N/A' }}</td>
+                        <tr class="hover:bg-blue-50/50 transition duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="font-medium">{{ payout.date[:10] }}</div>
+                                <div class="text-gray-500 text-xs">{{ payout.date[11:16] }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-700">
+                                {{ "{:,.2f}".format(payout.amount) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                {{ payout.description or 'Payout' }}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center py-10 text-gray-500">No payouts recorded yet.</div>
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-hand-holding-usd text-3xl text-gray-300 mb-3"></i>
+                    <p>No payouts recorded yet.</p>
+                    <p class="text-sm text-gray-400 mt-1">Payouts are processed by administrators</p>
+                </div>
                 {% endif %}
             </div>
         </div>
-
     </div>
 
+    <!-- Financial Timeline -->
+    <div class="bg-white shadow-2xl rounded-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Financial Timeline</h2>
+        {% if contributions or payouts %}
+        <div class="space-y-6">
+            {% set all_transactions = contributions|list + payouts|list %}
+            {% set sorted_transactions = all_transactions|sort(attribute='date', reverse=true) %}
+            
+            {% for transaction in sorted_transactions[:10] %}
+            <div class="flex items-start">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4
+                    {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}bg-green-100 text-green-600
+                    {% else %}bg-blue-100 text-blue-600{% endif %}">
+                    <i class="fas {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}fa-arrow-up{% else %}fa-arrow-down{% endif %} text-xs"></i>
+                </div>
+                <div class="flex-1 pt-1">
+                    <div class="flex justify-between">
+                        <p class="font-medium text-gray-900">
+                            {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}
+                                Contribution made
+                            {% else %}
+                                Payout received
+                            {% endif %}
+                        </p>
+                        <p class="font-bold 
+                            {% if 'contribution' in transaction.description|lower or transaction.type == 'contribution' %}text-green-700
+                            {% else %}text-blue-700{% endif %}">
+                            {{ "{:,.2f}".format(transaction.amount) }} Birr
+                        </p>
+                    </div>
+                    <p class="text-sm text-gray-500">{{ transaction.description or 'Transaction' }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ transaction.date[:16] }}</p>
+                </div>
+            </div>
+            {% if not loop.last %}
+            <div class="border-l-2 border-gray-200 ml-4 pl-8 h-6"></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <i class="fas fa-history text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500">No financial activity yet.</p>
+            <p class="text-sm text-gray-400">Start contributing to build your financial history</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
